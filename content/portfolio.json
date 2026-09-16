@@ -483,7 +483,7 @@
   ],
   "skillGroups": [
     {
-      "id": "lang",
+      "id": "lenguajes",
       "name": "lenguajes",
       "color": "green",
       "skills": [
@@ -491,13 +491,13 @@
         "typescript",
         "javascript",
         "c / c++",
-        "kotlin",
+        "swift",
         "java",
         "sql"
       ]
     },
     {
-      "id": "web",
+      "id": "web-y-apps",
       "name": "web y apps",
       "color": "blue",
       "skills": [
@@ -507,18 +507,18 @@
         "node.js",
         "fastapi",
         "react native",
-        "supabase"
+        "supabase",
+        "firebase"
       ]
     },
     {
-      "id": "ai",
+      "id": "robo-tica-e-ia",
       "name": "robótica e ia",
       "color": "amber",
       "skills": [
         "ros 2",
         "opencv",
-        "llm",
-        "kalman"
+        "llm wrappers"
       ]
     },
     {
