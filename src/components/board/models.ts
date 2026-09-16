@@ -39,6 +39,7 @@ export interface Shared {
   fonts: Fonts;
   anisotropy: number;
   textures: THREE.Texture[];
+  mobile?: boolean;
 }
 
 export const LED_HUE: Record<LedColor, number> = {
@@ -48,7 +49,7 @@ export const LED_HUE: Record<LedColor, number> = {
   white: 0xf4f8ff,
 };
 
-export function createShared(fonts: Fonts, anisotropy: number): Shared {
+export function createShared(fonts: Fonts, anisotropy: number, mobile = false): Shared {
   return {
     epoxy: new THREE.MeshStandardMaterial({ color: 0x121415, roughness: 0.72, metalness: 0 }),
     tin: new THREE.MeshStandardMaterial({ color: 0xd9dddd, roughness: 0.3, metalness: 1 }),
@@ -59,6 +60,7 @@ export function createShared(fonts: Fonts, anisotropy: number): Shared {
     fonts,
     anisotropy,
     textures: [],
+    mobile,
   };
 }
 
@@ -143,7 +145,7 @@ function buildChip(s: Shared, part: Part): PartModel {
 
   // die, bond wires and lead frame inside
   const dieSize = Math.min(g.bx, g.by) * (g.kind === "soic" ? 0.55 : 0.46);
-  const dieTex = tex(s, dieFloorplan(s.fonts, pr.stack, 31 * part.index + 7));
+  const dieTex = tex(s, dieFloorplan(s.fonts, pr.stack, 31 * part.index + 7, s.mobile ? 384 : 512));
   const die = new THREE.Mesh(
     new THREE.BoxGeometry(dieSize, 0.06, dieSize * (g.kind === "soic" ? Math.min(1.6, g.by / g.bx) : 1)),
     [
@@ -224,6 +226,7 @@ function buildChip(s: Shared, part: Part): PartModel {
       [marking[0], marking[1], `${pr.year} ${part.ref}`],
       (g.by - inset * 2) / (g.bx - inset * 2),
       g.kind === "soic",
+      s.mobile ? 256 : 512,
     ),
   );
   const mark = new THREE.Mesh(
@@ -367,6 +370,7 @@ function buildCapacitor(s: Shared, part: Part): PartModel {
       job.end === null ? `${job.start}–HOY` : job.end === job.start ? `${job.start}` : `${job.start}–${job.end}`,
       part.ref,
       bandH / (2 * Math.PI * r),
+      s.mobile ? 512 : 1024,
     ),
   );
   sleeveTex.wrapS = THREE.RepeatWrapping;

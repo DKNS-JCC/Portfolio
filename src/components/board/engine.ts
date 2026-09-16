@@ -165,99 +165,119 @@ export class BoardEngine {
       this.events.error("webgl");
       return;
     }
-    const r = this.renderer;
-    r.setPixelRatio(Math.min(window.devicePixelRatio, this.mobile ? 2 : 1.75));
-    r.outputColorSpace = THREE.SRGBColorSpace;
-    r.toneMapping = THREE.ACESFilmicToneMapping;
-    r.toneMappingExposure = 0.92;
-    r.shadowMap.enabled = true;
-    r.shadowMap.type = THREE.PCFShadowMap;
-    r.shadowMap.autoUpdate = false;
+    try {
+      const r = this.renderer;
+      r.setPixelRatio(Math.min(window.devicePixelRatio, this.mobile ? 2 : 1.75));
+      r.outputColorSpace = THREE.SRGBColorSpace;
+      r.toneMapping = THREE.ACESFilmicToneMapping;
+      r.toneMappingExposure = 0.92;
+      r.shadowMap.enabled = true;
+      r.shadowMap.type = THREE.PCFShadowMap;
+      r.shadowMap.autoUpdate = false;
 
-    this.scene.background = new THREE.Color(0x06140a);
-    const pmrem = new THREE.PMREMGenerator(r);
-    const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    this.scene.environment = env;
-    this.scene.environmentIntensity = 0.5;
-    pmrem.dispose();
+      this.canvas.addEventListener("webglcontextlost", (e) => {
+        e.preventDefault();
+        console.warn("WebGL context lost; switching to fallback");
+        this.events.error("webgl-lost");
+      });
 
-    this.sun = new THREE.DirectionalLight(0xfff0dc, 1.7);
-    this.sun.position.set(-150, 320, 210);
-    this.sun.castShadow = true;
-    const size = this.mobile ? 2048 : 4096;
-    this.sun.shadow.mapSize.set(size, size);
-    const sc = this.sun.shadow.camera;
-    sc.left = -175;
-    sc.right = 175;
-    sc.top = 150;
-    sc.bottom = -150;
-    sc.near = 50;
-    sc.far = 900;
-    this.sun.shadow.bias = -0.0004;
-    this.sun.shadow.normalBias = 0.04;
-    this.scene.add(this.sun, this.sun.target);
-    this.scene.add(new THREE.HemisphereLight(0xe4f2e6, 0x0b1a0e, 0.3));
+      this.scene.background = new THREE.Color(0x06140a);
+      const pmrem = new THREE.PMREMGenerator(r);
+      const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+      this.scene.environment = env;
+      this.scene.environmentIntensity = 0.5;
+      pmrem.dispose();
 
-    this.scene.add(this.board);
+      this.sun = new THREE.DirectionalLight(0xfff0dc, 1.7);
+      this.sun.position.set(-150, 320, 210);
+      this.sun.castShadow = true;
+      const size = this.mobile ? 1024 : 2048;
+      this.sun.shadow.mapSize.set(size, size);
+      const sc = this.sun.shadow.camera;
+      sc.left = -175;
+      sc.right = 175;
+      sc.top = 150;
+      sc.bottom = -150;
+      sc.near = 50;
+      sc.far = 900;
+      this.sun.shadow.bias = -0.0004;
+      this.sun.shadow.normalBias = 0.04;
+      this.scene.add(this.sun, this.sun.target);
+      this.scene.add(new THREE.HemisphereLight(0xe4f2e6, 0x0b1a0e, 0.3));
 
-    await this.loadAssets();
-    if (this.disposed) return;
+      this.scene.add(this.board);
 
-    const anisotropy = r.capabilities.getMaxAnisotropy();
-    this.shared = createShared(this.fonts, anisotropy);
+      await this.loadAssets();
+      if (this.disposed) return;
 
-    this.buildBoard(anisotropy);
-    this.buildSilk(anisotropy);
-    this.buildNet();
-    this.buildParts();
+      const anisotropy = r.capabilities.getMaxAnisotropy();
+      this.shared = createShared(this.fonts, anisotropy, this.mobile);
 
-    this.resize();
-    window.addEventListener("resize", this.resize);
-    window.addEventListener("scroll", this.onScroll, { passive: true });
-    this.canvas.addEventListener("pointermove", this.onPointerMove);
-    this.canvas.addEventListener("pointerdown", this.onPointerDown);
-    window.addEventListener("pointerup", this.onPointerUp);
-    this.canvas.addEventListener("pointerleave", this.onPointerLeave);
-    this.canvas.addEventListener("pointercancel", this.onPointerCancel);
+      this.buildBoard(anisotropy);
+      this.buildSilk(anisotropy);
+      this.buildNet();
+      this.buildParts();
 
-    this.onScroll();
-    this.d = unitsToDistance(this.uTarget);
-    this.netProgress.value = this.d;
-    this.cam = this.rigFor(this.uTarget, this.d);
-    this.ready = true;
-    this.renderer.shadowMap.needsUpdate = true;
-    this.last = performance.now();
-    this.raf = requestAnimationFrame(this.loop);
-    this.interval = window.setInterval(this.fallback, 120);
-    this.events.ready();
-    if (process.env.NODE_ENV !== "production") {
-      (window as unknown as { __pcb: unknown }).__pcb = {
-        u: (u: number | null) => {
-          this.debugU = u;
-          this.onScroll();
-        },
-        engine: this,
-      };
+      this.resize();
+      window.addEventListener("resize", this.resize);
+      window.addEventListener("scroll", this.onScroll, { passive: true });
+      this.canvas.addEventListener("pointermove", this.onPointerMove);
+      this.canvas.addEventListener("pointerdown", this.onPointerDown);
+      window.addEventListener("pointerup", this.onPointerUp);
+      this.canvas.addEventListener("pointerleave", this.onPointerLeave);
+      this.canvas.addEventListener("pointercancel", this.onPointerCancel);
+
+      this.onScroll();
+      this.d = unitsToDistance(this.uTarget);
+      this.netProgress.value = this.d;
+      this.cam = this.rigFor(this.uTarget, this.d);
+      this.ready = true;
+      this.renderer.shadowMap.needsUpdate = true;
+      this.last = performance.now();
+      this.raf = requestAnimationFrame(this.loop);
+      this.interval = window.setInterval(this.fallback, 120);
+      this.events.ready();
+      if (process.env.NODE_ENV !== "production") {
+        (window as unknown as { __pcb: unknown }).__pcb = {
+          u: (u: number | null) => {
+            this.debugU = u;
+            this.onScroll();
+          },
+          engine: this,
+        };
+      }
+    } catch (err) {
+      console.error("BoardEngine initialization failed:", err);
+      this.events.error(err instanceof Error ? err.message : "init-failed");
     }
   }
 
   private async loadAssets() {
+    const cleanFamily = (fam: string, fallback: string) => {
+      const first = fam.split(",")[0].replace(/['"]/g, "").trim();
+      return first || fallback;
+    };
+    const display = cleanFamily(this.fonts.display, "sans-serif");
+    const mono = cleanFamily(this.fonts.mono, "monospace");
+
     const families = [
-      `700 32px ${this.fonts.display}`,
-      `600 32px ${this.fonts.display}`,
-      `500 32px ${this.fonts.mono}`,
-      `600 32px ${this.fonts.mono}`,
+      `700 32px "${display}"`,
+      `600 32px "${display}"`,
+      `500 32px "${mono}"`,
+      `600 32px "${mono}"`,
     ];
-    await Promise.race([
-      Promise.all(families.map((f) => document.fonts.load(f))),
-      new Promise((res) => setTimeout(res, 2500)),
-    ]);
+    if (typeof document !== "undefined" && document.fonts?.load) {
+      await Promise.race([
+        Promise.all(families.map((f) => document.fonts.load(f).catch(() => null))),
+        new Promise((res) => setTimeout(res, 2000)),
+      ]);
+    }
     this.logo = await new Promise<HTMLImageElement | null>((resolve) => {
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = () => resolve(null);
       img.src = "/dkns.png";
-      setTimeout(() => resolve(null), 3000);
+      setTimeout(() => resolve(null), 2500);
     });
   }
 
@@ -272,7 +292,7 @@ export class BoardEngine {
 
   private textureScale() {
     const max = this.renderer.capabilities.maxTextureSize;
-    const wanted = this.mobile ? 2560 : 4096;
+    const wanted = this.mobile ? 1800 : 2880;
     return Math.min(wanted, max) / BOARD.w;
   }
 
@@ -1064,6 +1084,10 @@ export class BoardEngine {
 
   get unitsTotal() {
     return TOTAL_UNITS;
+  }
+
+  get isReady() {
+    return this.ready;
   }
 
   /** development hook: drive the board without scrolling the document */

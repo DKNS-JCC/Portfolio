@@ -343,7 +343,8 @@ export function paintBoard(canvas: HTMLCanvasElement, o: PaintOptions) {
   const pal = PALETTES[o.palette];
   canvas.width = Math.round(BOARD.w * o.scale);
   canvas.height = Math.round(BOARD.h * o.scale);
-  const g = canvas.getContext("2d")!;
+  const g = canvas.getContext("2d");
+  if (!g) return;
   const c: Ctx = { g, s: o.scale, side: o.side };
   const top = o.side === "top";
 
@@ -455,7 +456,8 @@ function paintLogo(c: Ctx, img: HTMLImageElement, color: string) {
   const tmp = document.createElement("canvas");
   tmp.width = px;
   tmp.height = px;
-  const t = tmp.getContext("2d")!;
+  const t = tmp.getContext("2d");
+  if (!t) return;
   t.drawImage(img, 0, 0, px, px);
   t.globalCompositeOperation = "source-in";
   t.fillStyle = color;

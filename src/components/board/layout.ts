@@ -720,7 +720,7 @@ export const sections: Section[] = [
     name: "inicio",
     zone: "inicio",
     legend: ["placa sin montar", `${parts.length + passives.length} componentes por colocar`],
-    hint: "Haz scroll para rutear la pista. Cada componente se suelda cuando la pista llega a su pad.",
+    hint: "Haz scroll montar la placa. O haz click en los huecos para poner los componentes",
   },
   {
     id: "formacion",
@@ -728,7 +728,7 @@ export const sections: Section[] = [
     name: "formación",
     zone: "formacion",
     legend: ["Y cristal = formación", "R resistencia = certificado"],
-    hint: `${plural(studies.length, "cristal de cuarzo", "cristales de cuarzo")} para los estudios y ${plural(certs.length, "resistencia", "resistencias")} para los títulos. Pulsa uno para ver el detalle.`,
+    hint: `${plural(studies.length, "cristal de cuarzo", "cristales de cuarzo")} para los estudios y ${plural(certs.length, "resistencia", "resistencias")} para los títulos. Pulsa para ver en detalle.`,
   },
   {
     id: "experiencia",
@@ -736,15 +736,15 @@ export const sections: Section[] = [
     name: "experiencia",
     zone: "experiencia",
     legend: ["C condensador = puesto", "altura = tiempo"],
-    hint: "Un condensador por puesto. Cuanto más alto, más tiempo en él. Pulsa uno para leer la funda.",
+    hint: "Un condensador por puesto. Cuanto más alto, más tiempo en él. Pulsa para ver en detalle.",
   },
   {
     id: "proyectos",
     sheet: 4,
     name: "proyectos",
     zone: "proyectos-0",
-    legend: ["U circuito integrado = proyecto", "encapsulado = tamaño"],
-    hint: `${plural(projects.length, "chip", "chips")}, uno por proyecto. Pulsa uno para decaparlo: el die lleva grabadas sus tecnologías.`,
+    legend: ["U circuito integrado = proyecto", "proyectos destacados"],
+    hint: `${plural(projects.length, "chip", "chips")}, uno por proyecto. Pulsa uno para ver sus detalles y tecnologías.`,
   },
   {
     id: "stack",
@@ -760,7 +760,7 @@ export const sections: Section[] = [
     name: "contacto",
     zone: "contacto",
     legend: ["J2 bornero = contacto", "4 vías"],
-    hint: "Fin de la pista. Cada tornillo del bornero abre un enlace: email, GitHub, LinkedIn y CV.",
+    hint: "Conéctate. Cada uno abre un enlace: Email, GitHub, LinkedIn y CV.",
   },
 ];
 

@@ -165,21 +165,11 @@ export function buildLabels(): Label[] {
     }
     y += 2.4;
   }
-  b({ x: 196, y: 102, text: up("en el aula"), size: 3.2, family: "display", weight: 600, tracking: 0.08 });
+  b({ x: 196, y: 102, text: up("idiomas"), size: 3.2, family: "display", weight: 600, tracking: 0.08 });
   y = 110;
-  for (const item of person.classroom) {
-    wrap(item, 44).forEach((line, i) => {
-      b({ x: 196, y, text: (i === 0 ? "· " : "  ") + line, size: 1.6 });
-      y += 3.3;
-    });
-    y += 1.6;
-  }
-  y += 3;
-  b({ x: 196, y, text: up("idiomas"), size: 2, family: "display", weight: 600, tracking: 0.12 });
-  y += 5;
   person.languages.forEach(([k, v]) => {
-    b({ x: 196, y, text: up(`${k} · ${v}`), size: 1.5, tracking: 0.12 });
-    y += 3.4;
+    b({ x: 196, y, text: up(`${k} · ${v}`), size: 1.75, tracking: 0.12 });
+    y += 4.2;
   });
   b({ x: 22, y: 150, text: up(person.location), size: 1.5, tracking: 0.16 });
   b({ x: 22, y: 154.4, text: up(`© ${NOW_YEAR} ${person.given} ${person.family}`), size: 1.5, tracking: 0.16 });
@@ -196,14 +186,15 @@ export function fontFor(l: Label, fonts: Fonts, px: number) {
 const CAP = 0.7;
 
 export function buildAtlases(labels: Label[], fonts: Fonts, maxDensity: number) {
-  const SIZE = 2048;
+  const SIZE = maxDensity <= 36 ? 1024 : 2048;
   const PAD = 6;
-  const measure = document.createElement("canvas").getContext("2d")!;
+  const measureCv = document.createElement("canvas");
+  const measure = measureCv.getContext("2d");
   const items = labels.map((l) => {
     const emMm = l.size / CAP;
     const probePx = 100;
-    measure.font = fontFor(l, fonts, probePx);
-    const letter = measure.measureText(l.text).width;
+    if (measure) measure.font = fontFor(l, fonts, probePx);
+    const letter = measure ? measure.measureText(l.text).width : probePx * l.text.length * 0.6;
     const track = (l.tracking ?? 0) * probePx * Math.max(0, l.text.length - 1);
     const wMm = ((letter + track) / probePx) * emMm;
     const hMm = emMm * 1.18;
@@ -218,19 +209,22 @@ export function buildAtlases(labels: Label[], fonts: Fonts, maxDensity: number) 
   let cx = 0;
   let cy = 0;
   let rowH = 0;
-  const open = () => {
+  const open = (): CanvasRenderingContext2D | null => {
     const cv = document.createElement("canvas");
     cv.width = SIZE;
     cv.height = SIZE;
     canvases.push(cv);
-    ctx = cv.getContext("2d")!;
-    ctx.fillStyle = "#fff";
-    ctx.textBaseline = "alphabetic";
+    const c = cv.getContext("2d");
+    if (c) {
+      c.fillStyle = "#fff";
+      c.textBaseline = "alphabetic";
+    }
     cx = 0;
     cy = 0;
     rowH = 0;
+    return c;
   };
-  open();
+  ctx = open();
   for (const i of order) {
     const it = items[i];
     if (cx + it.wPx > SIZE) {
@@ -238,21 +232,25 @@ export function buildAtlases(labels: Label[], fonts: Fonts, maxDensity: number) 
       cy += rowH;
       rowH = 0;
     }
-    if (cy + it.hPx > SIZE) open();
-    const g = ctx!;
-    const emPx = (it.l.size / CAP) * it.density;
-    g.font = fontFor(it.l, fonts, emPx);
-    const trackPx = (it.l.tracking ?? 0) * emPx;
-    const baseline = cy + PAD / 2 + emPx * 0.94;
-    const spaced = g as CanvasRenderingContext2D & { letterSpacing?: string };
-    if (typeof spaced.letterSpacing === "string") {
-      spaced.letterSpacing = `${trackPx}px`;
-      g.fillText(it.l.text, cx + PAD / 2, baseline);
-    } else {
-      let x = cx + PAD / 2;
-      for (const ch of it.l.text) {
-        g.fillText(ch, x, baseline);
-        x += g.measureText(ch).width + trackPx;
+    if (cy + it.hPx > SIZE) {
+      ctx = open();
+    }
+    const g = ctx;
+    if (g) {
+      const emPx = (it.l.size / CAP) * it.density;
+      g.font = fontFor(it.l, fonts, emPx);
+      const trackPx = (it.l.tracking ?? 0) * emPx;
+      const baseline = cy + PAD / 2 + emPx * 0.94;
+      const spaced = g as CanvasRenderingContext2D & { letterSpacing?: string };
+      if (typeof spaced.letterSpacing === "string") {
+        spaced.letterSpacing = `${trackPx}px`;
+        g.fillText(it.l.text, cx + PAD / 2, baseline);
+      } else {
+        let x = cx + PAD / 2;
+        for (const ch of it.l.text) {
+          g.fillText(ch, x, baseline);
+          x += g.measureText(ch).width + trackPx;
+        }
       }
     }
     quads[i] = {

@@ -81,13 +81,6 @@ export default function SiteContent() {
         </section>
       ))}
 
-      <h2>En el aula</h2>
-      <ul>
-        {person.classroom.map((c) => (
-          <li key={c}>{c}</li>
-        ))}
-      </ul>
-
       <h2>Contacto</h2>
       <ul>
         {contactPins.map((c) => (

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CircleHelp, FlipVertical2, X } from "lucide-react";
-import { contactPins, person, projects } from "@/data/portfolio";
+import { CircleHelp, FileText, FlipVertical2, Mail, X } from "lucide-react";
+import { certs, contactPins, jobs, person, projects, skillGroups, studies } from "@/data/portfolio";
 import type { BoardEngine, ViewMode } from "./engine";
 import { Inspector } from "./Inspector";
 import { parts, partByRef, passives, sections, type SectionId } from "./layout";
@@ -13,10 +13,34 @@ function hoverText(ref: string | null, pin?: number) {
   if (!ref) return null;
   const p = partByRef.get(ref);
   if (!p) return null;
-  if (p.kind === "terminal" && pin !== undefined) return [ref, `pin ${pin + 1} · ${contactPins[pin].label}`, "abre el enlace"];
-  const pkg = p.pkg ?? p.footprint.split(":")[1]?.split("_").slice(0, 2).join(" ");
-  const value = p.kind === "chip" ? projects[p.index].name : p.value;
-  return [ref, value, pkg];
+  if (p.kind === "terminal") {
+    const label = pin !== undefined && contactPins[pin] ? contactPins[pin].label : "contacto";
+    return [ref, label, "abre el enlace"];
+  }
+  if (p.kind === "chip") {
+    return [ref, projects[p.index].name, projects[p.index].year];
+  }
+  if (p.kind === "capacitor") {
+    const j = jobs[p.index];
+    return [ref, j.role, j.org];
+  }
+  if (p.kind === "crystal") {
+    const s = studies[p.index];
+    return [ref, s.title, s.org];
+  }
+  if (p.kind === "resistor") {
+    const c = certs[p.index];
+    return [ref, c.title, c.org];
+  }
+  if (p.kind === "led") {
+    const gi = Math.floor(p.index / 100);
+    const g = skillGroups[gi];
+    return [ref, p.value, g ? g.name : "conocimientos"];
+  }
+  if (p.kind === "usbc") {
+    return [ref, `${person.given} ${person.family}`, "sobre mí"];
+  }
+  return [ref, p.value, ""];
 }
 
 export default function BoardApp() {
@@ -53,36 +77,71 @@ export default function BoardApp() {
       document.documentElement.dataset.fallback = "1";
       return;
     }
-    import("./engine").then(({ BoardEngine }) => {
-      if (cancelled || !canvasRef.current || !spacerRef.current) return;
-      engine = new BoardEngine(
-        canvasRef.current,
-        spacerRef.current,
-        {
-          x: hx.current,
-          y: hy.current,
-          net: hnet.current,
-          length: hlen.current,
-          placed: hplaced.current,
-          progress: hprog.current,
-        },
-        {
-          section: (id) => setSection(id),
-          hover: (ref, detail) => setHover({ ref, pin: detail?.pin }),
-          select: (ref) => setSelected(ref),
-          ready: () => setReady(true),
-          outro: (k) => setOutro(k),
-          error: () => {
-            document.documentElement.dataset.fallback = "1";
-          },
-        },
-        fonts,
-      );
-      engineRef.current = engine;
-      engine.init();
-    });
+    // Clean up probe context immediately so it does not compete for GPU memory on mobile
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+
+    // Watchdog: if the 3D board fails to load within 7 seconds, fall back gracefully
+    let isBoardReady = false;
+    const watchdog = window.setTimeout(() => {
+      if (!cancelled && !isBoardReady) {
+        console.warn("Board load timeout; switching to fallback");
+        document.documentElement.dataset.fallback = "1";
+        setReady(true);
+      }
+    }, 7000);
+
+    import("./engine")
+      .then(async ({ BoardEngine }) => {
+        if (cancelled || !canvasRef.current || !spacerRef.current) return;
+        try {
+          engine = new BoardEngine(
+            canvasRef.current,
+            spacerRef.current,
+            {
+              x: hx.current,
+              y: hy.current,
+              net: hnet.current,
+              length: hlen.current,
+              placed: hplaced.current,
+              progress: hprog.current,
+            },
+            {
+              section: (id) => setSection(id),
+              hover: (ref, detail) => setHover({ ref, pin: detail?.pin }),
+              select: (ref) => setSelected(ref),
+              ready: () => {
+                isBoardReady = true;
+                window.clearTimeout(watchdog);
+                setReady(true);
+              },
+              outro: (k) => setOutro(k),
+              error: () => {
+                window.clearTimeout(watchdog);
+                document.documentElement.dataset.fallback = "1";
+                setReady(true);
+              },
+            },
+            fonts,
+          );
+          engineRef.current = engine;
+          await engine.init();
+        } catch (err) {
+          console.error("Engine initialization error:", err);
+          window.clearTimeout(watchdog);
+          document.documentElement.dataset.fallback = "1";
+          setReady(true);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load engine module:", err);
+        window.clearTimeout(watchdog);
+        document.documentElement.dataset.fallback = "1";
+        setReady(true);
+      });
+
     return () => {
       cancelled = true;
+      window.clearTimeout(watchdog);
       engine?.dispose();
       engineRef.current = null;
     };
@@ -160,7 +219,7 @@ export default function BoardApp() {
           <span className="bar__name">
             Jorge Cuadrado<span> Criado</span>
           </span>
-          <span className="bar__path">jorge_cuadrado.kicad_pcb</span>
+          <span className="bar__path">jorge_cuadrado.pcb</span>
         </div>
         <span className="bar__sheet silk" aria-hidden="true">
           {current.sheet}/{sections.length} · {current.name}
@@ -242,20 +301,49 @@ export default function BoardApp() {
           {person.given} {person.family}
         </h2>
         <p>
-          Fin de la pista. Para proyectos, clases o puestos de trabajo:
+          Fin de la pista. Para proyectos o puestos de trabajo:
         </p>
         <div className="actions">
-          <a className="btn btn--gold" href={`mailto:${person.email}`} tabIndex={showLabel ? 0 : -1}>
-            {person.email}
+          <a
+            className="btn btn--gold"
+            href={`mailto:${person.email}`}
+            tabIndex={showLabel ? 0 : -1}
+            title={person.email}
+          >
+            <Mail size={14} strokeWidth={1.75} />
+            <span>email</span>
           </a>
-          <a className="btn btn--ink" href={person.github} target="_blank" rel="noopener noreferrer" tabIndex={showLabel ? 0 : -1}>
-            github
+          <a
+            className="btn btn--gold"
+            href={person.cv}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            tabIndex={showLabel ? 0 : -1}
+            title="Descargar CV (PDF)"
+          >
+            <FileText size={14} strokeWidth={1.75} />
+            <span>cv</span>
           </a>
-          <a className="btn btn--ink" href={person.linkedin} target="_blank" rel="noopener noreferrer" tabIndex={showLabel ? 0 : -1}>
-            linkedin
+          <a
+            className="btn btn--ink"
+            href={person.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            tabIndex={showLabel ? 0 : -1}
+            title="Perfil de LinkedIn"
+          >
+            <span>linkedin</span>
           </a>
-          <a className="btn btn--ink" href={person.cv} download tabIndex={showLabel ? 0 : -1}>
-            cv
+          <a
+            className="btn btn--ink"
+            href={person.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            tabIndex={showLabel ? 0 : -1}
+            title="Perfil de GitHub"
+          >
+            <span>github</span>
           </a>
         </div>
       </section>

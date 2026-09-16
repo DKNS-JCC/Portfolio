@@ -12,14 +12,18 @@ import {
 } from "@/data/portfolio";
 import { partByRef } from "./layout";
 
-const LED_CSS: Record<string, string> = {
-  green: "var(--led-green)",
-  amber: "var(--led-amber)",
-  blue: "var(--led-blue)",
-  white: "#f4f8ff",
+const KIND_LABELS: Record<string, string> = {
+  chip: "proyecto",
+  capacitor: "experiencia",
+  crystal: "formación",
+  resistor: "certificación",
+  led: "conocimientos",
+  terminal: "contacto",
+  usbc: "sobre mí",
 };
 
 function Props({ rows }: { rows: [string, string][] }) {
+  if (!rows || rows.length === 0) return null;
   return (
     <dl className="props">
       {rows.map(([k, v]) => (
@@ -32,22 +36,16 @@ function Props({ rows }: { rows: [string, string][] }) {
   );
 }
 
-function Footprint({ refdes }: { refdes: string }) {
-  const p = partByRef.get(refdes);
-  if (!p) return null;
-  return (
-    <div className="footprint">
-      {p.footprint} · capa F.Cu · x {p.x.toFixed(2)} y {p.y.toFixed(2)} mm
-    </div>
-  );
-}
-
 function Body({ refdes }: { refdes: string }) {
   const part = partByRef.get(refdes);
   if (!part) return null;
 
   if (part.kind === "chip") {
     const pr = projects[part.index];
+    const facts: [string, string][] = [
+      ...(pr.facts ?? []),
+      ["año", pr.year],
+    ];
     return (
       <>
         <h2>{pr.name}</h2>
@@ -55,8 +53,8 @@ function Body({ refdes }: { refdes: string }) {
         {pr.body.map((b) => (
           <p key={b}>{b}</p>
         ))}
-        <Props rows={[["encapsulado", (part.pkg ?? "").toLowerCase()], ...(pr.facts ?? []), ["año", pr.year]]} />
-        <div className="silk">bloques del die</div>
+        <Props rows={facts} />
+        <div className="silk">tecnologías</div>
         <ul className="nets">
           {pr.stack.map((s) => (
             <li key={s} className="net">
@@ -79,31 +77,25 @@ function Body({ refdes }: { refdes: string }) {
             ))}
           </div>
         )}
-        <Footprint refdes={refdes} />
       </>
     );
   }
 
   if (part.kind === "capacitor") {
     const j = jobs[part.index];
+    const period = j.end === null ? `${j.start} – hoy` : j.start === j.end ? String(j.start) : `${j.start} – ${j.end}`;
     return (
       <>
         <h2>{j.role}</h2>
         <p className="lede">
           {j.org} · {j.place}
         </p>
-        <Props
-          rows={[
-            ["periodo", j.end === null ? `${j.start} – hoy` : j.start === j.end ? String(j.start) : `${j.start} – ${j.end}`],
-            ["altura del condensador", `${part.height.toFixed(1)} mm`],
-          ]}
-        />
+        <Props rows={[["periodo", period]]} />
         <ul className="bullets">
           {j.bullets.map((b) => (
             <li key={b}>{b}</li>
           ))}
         </ul>
-        <Footprint refdes={refdes} />
       </>
     );
   }
@@ -115,8 +107,7 @@ function Body({ refdes }: { refdes: string }) {
         <h2>{s.title}</h2>
         <p className="lede">{s.org}</p>
         <p>{s.detail}</p>
-        <Props rows={[["periodo", s.period], ["grabado", s.marking.join(" · ").toLowerCase()]]} />
-        <Footprint refdes={refdes} />
+        <Props rows={[["periodo", s.period]]} />
       </>
     );
   }
@@ -128,14 +119,7 @@ function Body({ refdes }: { refdes: string }) {
         <h2>{c.title}</h2>
         <p className="lede">{c.org}</p>
         <p>{c.detail}</p>
-        <Props
-          rows={[
-            ...(c.year ? ([["año", c.year]] as [string, string][]) : []),
-            ["bandas", c.bands.map((b) => BAND_ES[b] ?? b).join(" · ")],
-          ]}
-        />
-        {c.code === c.year && <p>Las cuatro primeras bandas leen {c.year}.</p>}
-        <Footprint refdes={refdes} />
+        {c.year && <Props rows={[["año", c.year]]} />}
       </>
     );
   }
@@ -146,10 +130,7 @@ function Body({ refdes }: { refdes: string }) {
     return (
       <>
         <h2>{g.name.charAt(0).toUpperCase() + g.name.slice(1)}</h2>
-        <p className="lede">
-          {g.skills.length} leds en serie · color{" "}
-          <span style={{ color: LED_CSS[g.color] }}>{COLOR_ES[g.color]}</span>
-        </p>
+        <p className="lede">{g.skills.length} tecnologías</p>
         <ul className="nets">
           {g.skills.map((s) => (
             <li key={s} className={`net ${s === part.value ? "net--on" : ""}`}>
@@ -157,8 +138,6 @@ function Body({ refdes }: { refdes: string }) {
             </li>
           ))}
         </ul>
-        <p>Pulsar un led lo apaga o lo enciende. La tira completa está en la hoja 5.</p>
-        <Footprint refdes={refdes} />
       </>
     );
   }
@@ -167,7 +146,7 @@ function Body({ refdes }: { refdes: string }) {
     return (
       <>
         <h2>Contacto</h2>
-        <p className="lede">Cada tornillo del bornero abre un enlace.</p>
+        <p className="lede">Enlaces directos de contacto.</p>
         <ul className="pins">
           {contactPins.map((c, i) => (
             <li key={c.label}>
@@ -185,7 +164,6 @@ function Body({ refdes }: { refdes: string }) {
             </li>
           ))}
         </ul>
-        <Footprint refdes={refdes} />
       </>
     );
   }
@@ -201,48 +179,23 @@ function Body({ refdes }: { refdes: string }) {
           <p key={b}>{b}</p>
         ))}
         <Props rows={person.languages} />
-        <div className="silk">en el aula</div>
-        <ul className="bullets">
-          {person.classroom.map((c) => (
-            <li key={c}>{c}</li>
-          ))}
-        </ul>
-        <Footprint refdes={refdes} />
       </>
     );
   }
   return null;
 }
 
-const BAND_ES: Record<string, string> = {
-  black: "negro",
-  brown: "marrón",
-  red: "rojo",
-  orange: "naranja",
-  yellow: "amarillo",
-  green: "verde",
-  blue: "azul",
-  gold: "oro",
-};
-
-const COLOR_ES: Record<string, string> = {
-  green: "verde",
-  amber: "ámbar",
-  blue: "azul",
-  white: "blanco",
-};
-
 export function Inspector({ refdes, onClose }: { refdes: string; onClose: () => void }) {
   const part = partByRef.get(refdes);
   if (!part) return null;
-  const pkg = part.pkg ?? part.footprint.split(":")[1]?.split("_").slice(0, 3).join("_");
+  const label = KIND_LABELS[part.kind] ?? "detalle";
   return (
     <aside className="inspector" aria-label={`Propiedades de ${refdes}`} key={refdes}>
       <div className="inspector__head">
         <div style={{ display: "flex", alignItems: "baseline", gap: 10, minWidth: 0 }}>
           <span className="ref">{refdes}</span>
           <span className="silk" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            propiedades · {pkg}
+            {label}
           </span>
         </div>
         <button className="btn" onClick={onClose} aria-label="Cerrar">

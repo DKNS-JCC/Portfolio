@@ -27,11 +27,19 @@ export function chipMarking(
   lines: [string, string, string],
   aspect: number,
   soic: boolean,
+  targetW = 512,
 ) {
   const W = 512;
   const H = Math.round(W * aspect);
-  const c = canvas(W, H);
-  const g = c.getContext("2d")!;
+  const outW = Math.round(targetW);
+  const outH = Math.round(targetW * aspect);
+  const c = canvas(outW, outH);
+  const g = c.getContext("2d");
+  if (!g) return c;
+  if (targetW !== 512) {
+    const s = targetW / 512;
+    g.scale(s, s);
+  }
   g.clearRect(0, 0, W, H);
   // pin 1 dimple
   const r = W * (soic ? 0.07 : 0.045);
@@ -61,10 +69,15 @@ export function chipMarking(
 }
 
 /** silicon floorplan: one functional block per technology in the project */
-export function dieFloorplan(fonts: Fonts, blocks: string[], seed: number) {
+export function dieFloorplan(fonts: Fonts, blocks: string[], seed: number, targetSize = 1024) {
   const S = 1024;
-  const c = canvas(S, S);
-  const g = c.getContext("2d")!;
+  const c = canvas(targetSize, targetSize);
+  const g = c.getContext("2d");
+  if (!g) return c;
+  if (targetSize !== 1024) {
+    const s = targetSize / 1024;
+    g.scale(s, s);
+  }
   const rnd = mulberry32(seed);
 
   g.fillStyle = "#4d545b";
@@ -182,11 +195,18 @@ export function dieFloorplan(fonts: Fonts, blocks: string[], seed: number) {
 }
 
 /** PVC sleeve of a radial electrolytic. u = 0.5 faces the camera once offset */
-export function capacitorSleeve(fonts: Fonts, big: string, mid: string, small: string, heightOverCirc: number) {
+export function capacitorSleeve(fonts: Fonts, big: string, mid: string, small: string, heightOverCirc: number, targetW = 1024) {
   const W = 1024;
   const H = Math.max(64, Math.round(W * heightOverCirc));
-  const c = canvas(W, H);
-  const g = c.getContext("2d")!;
+  const outW = Math.round(targetW);
+  const outH = Math.max(32, Math.round(targetW * heightOverCirc));
+  const c = canvas(outW, outH);
+  const g = c.getContext("2d");
+  if (!g) return c;
+  if (targetW !== 1024) {
+    const s = targetW / 1024;
+    g.scale(s, s);
+  }
   g.fillStyle = "#121517";
   g.fillRect(0, 0, W, H);
   // polarity stripe, centred at u = 0.25 (ends up on the negative lead)
@@ -221,7 +241,8 @@ export function capacitorSleeve(fonts: Fonts, big: string, mid: string, small: s
 export function capacitorTop() {
   const S = 256;
   const c = canvas(S, S);
-  const g = c.getContext("2d")!;
+  const g = c.getContext("2d");
+  if (!g) return c;
   const grad = g.createRadialGradient(S * 0.42, S * 0.38, 4, S / 2, S / 2, S / 2);
   grad.addColorStop(0, "#d7dbde");
   grad.addColorStop(1, "#aab0b4");
@@ -252,7 +273,8 @@ export function crystalTop(fonts: Fonts, lines: [string, string]) {
   const W = 1024;
   const H = 400;
   const c = canvas(W, H);
-  const g = c.getContext("2d")!;
+  const g = c.getContext("2d");
+  if (!g) return c;
   g.clearRect(0, 0, W, H);
   g.fillStyle = "rgba(38,42,46,0.78)";
   g.textAlign = "center";
@@ -284,7 +306,8 @@ export function resistorBands(bands: string[], body: string) {
   const W = 64;
   const H = 512;
   const c = canvas(W, H);
-  const g = c.getContext("2d")!;
+  const g = c.getContext("2d");
+  if (!g) return c;
   g.fillStyle = body;
   g.fillRect(0, 0, W, H);
   const n = bands.length;
@@ -303,7 +326,8 @@ export function resistorBands(bands: string[], body: string) {
 export function ledSpill() {
   const S = 128;
   const c = canvas(S, S);
-  const g = c.getContext("2d")!;
+  const g = c.getContext("2d");
+  if (!g) return c;
   const grad = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
   grad.addColorStop(0, "rgba(255,255,255,0.9)");
   grad.addColorStop(0.25, "rgba(255,255,255,0.35)");
