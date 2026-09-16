@@ -1,0 +1,538 @@
+{
+  "person": {
+    "given": "Jorge",
+    "family": "Cuadrado Criado",
+    "role": "Ingeniero informático",
+    "focus": "robótica · impresión 3d · hardware · docencia",
+    "location": "Salamanca, España",
+    "summary": "Graduado en Ingeniería Informática por la Universidad de Salamanca y cursando el Máster en Sistemas Inteligentes. Trabaja con robots, drones, impresoras 3D y placas, y con el software que los controla.",
+    "bio": [
+      "Desde 2020 compagina la ingeniería con la enseñanza: clases de informática a personas mayores y monitor de ocio y tiempo libre con niños y jóvenes."
+    ],
+    "email": "jorgecuadradojcc@gmail.com",
+    "github": "https://github.com/DKNS-JCC",
+    "linkedin": "https://linkedin.com/in/jorge-cuadrado",
+    "cv": "/cv.pdf",
+    "languages": [
+      [
+        "español",
+        "nativo"
+      ],
+      [
+        "inglés",
+        "b2 · cambridge"
+      ]
+    ],
+    "classroom": [
+      "Programación desde cero: Scratch, Python y web con proyectos visibles desde el primer día.",
+      "Robótica e impresión 3D: Arduino, Raspberry Pi y piezas propias como taller o extraescolar.",
+      "Competencia digital: ofimática, uso responsable de internet e introducción a la IA."
+    ]
+  },
+  "projects": [
+    {
+      "name": "Artec · robot guía de museo",
+      "marking": [
+        "ARTEC",
+        "ROS2"
+      ],
+      "year": "2026",
+      "package": "LQFP-144",
+      "summary": "Trabajo de Fin de Grado: plataforma de gestión para robots guía de museo, con un modelo de lenguaje que explica cada pieza.",
+      "body": [
+        "Frontend en Vue 3 y backend en Express que hablan con el robot a través de ROS en tiempo real.",
+        "LA visita se adapta al usuario mediante uso de LLMs y permite manejar al robot en lenguaje natural",
+        "Integra LiDAR, cámaras RGB-D y servomotores con la aplicación web."
+      ],
+      "facts": [
+        [
+          "tipo",
+          "tfg · grado en ing. informática"
+        ],
+        [
+          "niveles de discurso",
+          "4"
+        ],
+        [
+          "sensores",
+          "lidar · rgb-d · servos"
+        ]
+      ],
+      "stack": [
+        "vue 3",
+        "express",
+        "ros 2",
+        "roslib",
+        "geminiapi",
+        "sqlite",
+        "jwt",
+        "tailwind"
+      ],
+      "links": [
+        {
+          "label": "repositorio",
+          "href": "https://github.com/DKNS-JCC/ArtecWeb"
+        }
+      ]
+    },
+    {
+      "name": "Zona Dron",
+      "marking": [
+        "ZONADRON",
+        "UAS ES"
+      ],
+      "year": "2026",
+      "package": "LQFP-100",
+      "summary": "App móvil que responde «¿puedo volar el dron aquí?» en cualquier punto de España con las zonas geográficas UAS de ENAIRE.",
+      "body": [
+        "Se señala un sitio con el GPS, en el mapa, por dirección o por coordenadas, y devuelve una de seis respuestas: desde «puedes volar» hasta «fuera de España».",
+        "Android e iPhone, en español e inglés. Sin cuenta, sin anuncios, sin seguimiento y sin claves de API."
+      ],
+      "facts": [
+        [
+          "plataformas",
+          "android · ios"
+        ],
+        [
+          "idiomas",
+          "es · en"
+        ],
+        [
+          "respuestas",
+          "6"
+        ],
+        [
+          "cuentas necesarias",
+          "0"
+        ]
+      ],
+      "stack": [
+        "typescript",
+        "react native",
+        "expo",
+        "eas",
+        "enaire uas",
+        "i18n"
+      ],
+      "links": [
+        {
+          "label": "repositorio",
+          "href": "https://github.com/DKNS-JCC/zonadron"
+        }
+      ]
+    },
+    {
+      "name": "DJI Tracker",
+      "marking": [
+        "DJI-TRK",
+        "MINI 2"
+      ],
+      "year": "2026",
+      "package": "LQFP-48",
+      "summary": "Seguimiento visual para un DJI Mini 2: se dibuja un rectángulo sobre un objeto y el gimbal lo sigue en lazo cerrado.",
+      "body": [
+        "Núcleo en Kotlin puro (Kalman, predicción, control y métricas) que se prueba en el PC en 2,8 s, separado de la app Android que recibe el vídeo del dron.",
+        "Probado en vuelo real con el gimbal siguiendo objetivos lentos. La siguiente fase añade la guiñada del dron."
+      ],
+      "facts": [
+        [
+          "vídeo",
+          "1280×720 · 35 fps"
+        ],
+        [
+          "tracker",
+          "26,6 ms por frame"
+        ],
+        [
+          "retardo compensado",
+          "≈350 ms"
+        ],
+        [
+          "mejora por predicción",
+          "×5,2 en simulación"
+        ]
+      ],
+      "stack": [
+        "kotlin",
+        "android",
+        "dji msdk v4",
+        "opencv",
+        "kalman",
+        "control"
+      ],
+      "links": []
+    },
+    {
+      "name": "Oxiditto",
+      "marking": [
+        "RP2040",
+        "OXIDITO"
+      ],
+      "year": "2026",
+      "package": "SOIC-16",
+      "summary": "Consola portátil sobre una Raspberry Pi Pico, diseñada en KiCad.",
+      "body": [],
+      "facts": [
+        [
+          "placa",
+          "110 × 180 mm · 2 capas"
+        ],
+        [
+          "componentes",
+          "49 · tht"
+        ],
+        [
+          "taladros",
+          "203"
+        ],
+        [
+          "drc",
+          "0 errores"
+        ]
+      ],
+      "stack": [
+        "kicad",
+        "python",
+        "rp2040",
+        "freerouting",
+        "gerber"
+      ],
+      "links": []
+    },
+    {
+      "name": "OrcaSlicer · soporte CFS",
+      "marking": [
+        "ORCA-CFS",
+        "K1 SE"
+      ],
+      "year": "2026",
+      "package": "LQFP-48",
+      "summary": "Fork de OrcaSlicer que añade el CFS de Creality a la familia K1: el laminador sabe qué filamento hay en cada ranura.",
+      "body": [
+        "Asigna cada filamento a su ranura del CFS vía Moonraker y sincroniza los filamentos cargados con la barra lateral.",
+        "Añade perfiles de impresora K1 con CFS y va acompañado de macros Klipper propias para una K1 SE."
+      ],
+      "facts": [
+        [
+          "impresora",
+          "creality k1 se + cfs"
+        ],
+        [
+          "comunicación",
+          "moonraker api"
+        ]
+      ],
+      "stack": [
+        "c++",
+        "orcaslicer",
+        "moonraker",
+        "klipper",
+        "jinja"
+      ],
+      "links": [
+        {
+          "label": "repositorio",
+          "href": "https://github.com/DKNS-JCC/OrcaSlicer"
+        }
+      ]
+    },
+    {
+      "name": "3DCC Salamanca",
+      "marking": [
+        "3DCC",
+        "SALAMANCA"
+      ],
+      "year": "2026",
+      "package": "LQFP-100",
+      "summary": "Web y herramientas de 3DCC, un servicio de impresión 3D por encargo en Salamanca.",
+      "body": [
+        "Web en Next.js con exportación estática y Supabase para datos, almacenamiento y autenticación, con panel de administración propio.",
+        "Calculadora de costes para escritorio y Android que da a cada cliente un precio razonable y su desglose."
+      ],
+      "facts": [
+        [
+          "web",
+          "next.js · supabase"
+        ],
+        [
+          "calculadora",
+          "vue · electron · capacitor"
+        ]
+      ],
+      "stack": [
+        "next.js",
+        "typescript",
+        "supabase",
+        "vue",
+        "electron",
+        "capacitor"
+      ],
+      "links": [
+        {
+          "label": "web",
+          "href": "https://www.impresion3dcc.com"
+        },
+        {
+          "label": "calculadora",
+          "href": "https://github.com/DKNS-JCC/Calculadora"
+        }
+      ]
+    },
+    {
+      "name": "Kiosko GJ",
+      "marking": [
+        "KIOSKO",
+        "PWA"
+      ],
+      "year": "2026",
+      "package": "SOIC-16",
+      "summary": "PWA para el kiosko de un campamento infantil: productos y saldo por niño, desde el móvil de los monitores.",
+      "body": [
+        "Autoalojada en una Raspberry Pi: FastAPI con SQLite en modo WAL detrás de Caddy y un frontend React instalable."
+      ],
+      "facts": [
+        [
+          "servidor",
+          "raspberry pi 3b+"
+        ],
+        [
+          "base de datos",
+          "sqlite · wal"
+        ]
+      ],
+      "stack": [
+        "fastapi",
+        "sqlalchemy",
+        "sqlite",
+        "react",
+        "typescript",
+        "caddy"
+      ],
+      "links": [
+        {
+          "label": "repositorio",
+          "href": "https://github.com/DKNS-JCC/kioskogj"
+        }
+      ]
+    },
+    {
+      "name": "RePETeR",
+      "marking": [
+        "REPETER",
+        "PET"
+      ],
+      "year": "2025",
+      "package": "SOIC-8",
+      "summary": "Máquina que convierte botellas de PET en filamento para impresión 3D. Con el menos presupuesto posible",
+      "body": [
+        "Arduino con control PID de la temperatura del extrusor: termistor NTC, relé, encoder y pantalla SSD1306 por I2C."
+      ],
+      "facts": [
+        [
+          "control",
+          "pid"
+        ]
+      ],
+      "stack": [
+        "arduino",
+        "c++",
+        "pid",
+        "i2c"
+      ],
+      "links": [
+        {
+          "label": "repositorio",
+          "href": "https://github.com/DKNS-JCC/RePETeR"
+        }
+      ]
+    },
+    {
+      "name": "LCDeej",
+      "marking": [
+        "LCDEEJ",
+        "MIXER"
+      ],
+      "year": "2024",
+      "package": "SOIC-8",
+      "summary": "Mezclador de volumen físico por aplicación, con una pantalla que muestra la canción que suena.",
+      "body": [
+        "Amplía el proyecto Deej: Arduino Nano, 4 potenciómetros de 10 kΩ y LCD 16×2 por I2C, con la parte de PC en Python."
+      ],
+      "facts": [
+        [
+          "canales",
+          "4"
+        ]
+      ],
+      "stack": [
+        "arduino",
+        "python",
+        "i2c"
+      ],
+      "links": [
+        {
+          "label": "repositorio",
+          "href": "https://github.com/DKNS-JCC/LCDeej"
+        }
+      ]
+    }
+  ],
+  "jobs": [
+    {
+      "role": "Desarrollador full-stack",
+      "org": "ESALAB",
+      "place": "Salamanca",
+      "start": 2025,
+      "end": 2025,
+      "sleeve": "ESALAB",
+      "bullets": [
+        "Desarrollo completo de una plataforma robótica de divulgación cultural.",
+        "Integración de hardware (LiDAR, cámaras RGB-D, servomotores) con la aplicación web.",
+        "Documentación técnica y control de versiones con Git."
+      ]
+    },
+    {
+      "role": "Impresión 3D y desarrollo",
+      "org": "Proyectos propios · 3DCC",
+      "place": "Salamanca",
+      "start": 2021,
+      "end": null,
+      "sleeve": "3DCC",
+      "bullets": [
+        "Diseño e impresión 3D de piezas por encargo.",
+        "Electrónica y apps propias, varias de uso educativo."
+      ]
+    },
+    {
+      "role": "Profesor de informática y TIC",
+      "org": "AVESAL",
+      "place": "Salamanca",
+      "start": 2024,
+      "end": 2024,
+      "sleeve": "AVESAL",
+      "bullets": [
+        "Clases de informática y nuevas tecnologías a personas mayores.",
+        "Contenidos, materiales y ritmo adaptados al nivel real de cada alumno.",
+        "Coordinación y planificación de las actividades formativas del programa."
+      ]
+    },
+    {
+      "role": "Monitor de ocio y tiempo libre",
+      "org": "Grupo Joven Pizarrales",
+      "place": "Salamanca",
+      "start": 2020,
+      "end": null,
+      "sleeve": "GJP",
+      "bullets": [
+        "Diseño y dinamización de actividades educativas y campamentos con niños y adolescentes.",
+        "Gamificación como herramienta de aprendizaje y motivación.",
+        "Gestión de grupo, resolución de conflictos y trabajo en equipo de monitores."
+      ]
+    }
+  ],
+  "studies": [
+    {
+      "title": "Grado en Ingeniería Informática",
+      "org": "Universidad de Salamanca",
+      "period": "2022 – 2026",
+      "marking": [
+        "GII USAL",
+        "22-26"
+      ],
+      "detail": "Trabajo de Fin de Grado: robot guía de museo asistido por modelos de lenguaje (ROS 2 + IA)."
+    },
+    {
+      "title": "Máster en Sistemas Inteligentes",
+      "org": "Universidad de Salamanca",
+      "period": "en curso",
+      "marking": [
+        "MSI USAL",
+        "26-"
+      ],
+      "detail": "Máster universitario de la Universidad de Salamanca, en curso."
+    }
+  ],
+  "certs": [
+    {
+      "title": "Inglés B2 Certificate",
+      "org": "Cambridge English",
+      "year": "2022",
+      "code": "B2",
+      "detail": "B2 First, Cambridge English.",
+      "bands": [
+        "brown",
+        "black",
+        "red",
+        "gold"
+      ]
+    },
+    {
+      "title": "Título de monitor de ocio y tiempo libre",
+      "org": "Título oficial",
+      "year": "2023",
+      "code": "2023",
+      "detail": "Enseñanza, coordinación y gamificación de actividades.",
+      "bands": [
+        "red",
+        "black",
+        "red",
+        "orange",
+        "gold"
+      ]
+    }
+  ],
+  "skillGroups": [
+    {
+      "id": "lang",
+      "name": "lenguajes",
+      "color": "green",
+      "skills": [
+        "python",
+        "typescript",
+        "javascript",
+        "c / c++",
+        "kotlin",
+        "java",
+        "sql"
+      ]
+    },
+    {
+      "id": "web",
+      "name": "web y apps",
+      "color": "blue",
+      "skills": [
+        "vue 3",
+        "react",
+        "next.js",
+        "node.js",
+        "fastapi",
+        "react native",
+        "supabase"
+      ]
+    },
+    {
+      "id": "ai",
+      "name": "robótica e ia",
+      "color": "amber",
+      "skills": [
+        "ros 2",
+        "opencv",
+        "llm",
+        "kalman"
+      ]
+    },
+    {
+      "id": "hw",
+      "name": "hardware",
+      "color": "white",
+      "skills": [
+        "kicad",
+        "arduino",
+        "esp32",
+        "raspberry pi",
+        "klipper",
+        "impresión 3d"
+      ]
+    }
+  ]
+}
