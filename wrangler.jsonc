@@ -1,0 +1,10 @@
+{
+  // Cloudflare Worker that only serves the static export in out/ (no script).
+  // "name" must match the Worker name in the Cloudflare dashboard.
+  "name": "dkns",
+  "compatibility_date": "2026-09-16",
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page"
+  }
+}
