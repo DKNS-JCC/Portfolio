@@ -1,0 +1,8 @@
+# Text files are stored with LF; binaries are never converted.
+* text=auto eol=lf
+
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary

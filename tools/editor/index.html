@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Editor · jcc-portfolio</title>
+    <link rel="icon" href="/dkns.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="/editor.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <div class="bar__file">
+        <img src="/dkns.png" alt="" width="22" height="22" />
+        <span class="bar__name">Editor de contenido</span>
+        <span class="bar__path">content/portfolio.json</span>
+      </div>
+      <div class="bar__state">
+        <span class="dot" id="state-dot"></span>
+        <span class="silk" id="state-text">cargando</span>
+      </div>
+      <div class="tools">
+        <label class="btn btn--line" title="Sustituye public/cv.pdf">
+          subir cv
+          <input type="file" accept="application/pdf" id="cv-input" hidden />
+        </label>
+        <button class="btn btn--line" id="save">guardar <kbd>ctrl s</kbd></button>
+        <button class="btn btn--gold" id="publish">publicar</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <nav class="sheets" id="sheets" aria-label="Secciones"></nav>
+      <section class="list" id="list" aria-label="Elementos"></section>
+      <section class="form" id="form" aria-label="Edición"></section>
+    </main>
+
+    <footer class="status">
+      <span class="status__cell" id="git-branch"><i>rama</i> —</span>
+      <span class="status__cell" id="git-remote"><i>remoto</i> —</span>
+      <span class="status__cell status__cell--grow" id="errors-line"></span>
+    </footer>
+
+    <dialog class="sheet" id="publish-dialog">
+      <form method="dialog" class="sheet__inner">
+        <div class="sheet__head">
+          <span class="silk">publicar</span>
+        </div>
+        <div class="sheet__body">
+          <p id="publish-info"></p>
+          <label class="field">
+            <span class="silk">mensaje del commit</span>
+            <input type="text" id="publish-message" value="Actualizar contenido del portfolio" />
+          </label>
+          <pre class="log" id="publish-log" hidden></pre>
+        </div>
+        <div class="sheet__foot">
+          <button class="btn btn--line" value="cancel">cerrar</button>
+          <button class="btn btn--gold" id="publish-go" value="go">guardar y publicar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="/editor.js"></script>
+  </body>
+</html>

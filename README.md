@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# jcc-portfolio
 
-## Getting Started
+Portfolio de Jorge Cuadrado Criado. La web es una placa de circuito en 3D: el scroll rutea una pista y cada componente se suelda cuando la pista llega a su pad.
 
-First, run the development server:
+| Componente | Contenido |
+| --- | --- |
+| J1 · USB-C | perfil (inicio de la pista) |
+| Y · cristales | formación |
+| R · resistencias | títulos y certificados |
+| C · condensadores | experiencia; la altura indica el tiempo en el puesto |
+| U · circuitos integrados | proyectos; al pulsarlos se decapan y el die muestra sus tecnologías |
+| D · LEDs | conocimientos |
+| J2 · bornero | contacto; cada tornillo abre un enlace |
+| SW1 · pulsador | vuelve al principio |
+
+Controles: scroll para avanzar, clic para inspeccionar, arrastrar para orbitar, `3` alterna visor 3D y editor de PCB, `F` voltea la placa, `?` muestra los atajos.
+
+## Actualizar el contenido
+
+Todo el contenido está en [`content/portfolio.json`](content/portfolio.json). La placa se construye a partir de él: al añadir un proyecto aparece un chip nuevo, y si no cabe en la fila se abre otra y la placa crece. Las referencias (U1, C1…) se numeran solas.
+
+La forma cómoda de editarlo:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run editor
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre un editor en `http://127.0.0.1:4321` con una pestaña por sección. Desde ahí se puede:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- añadir, quitar y reordenar proyectos, puestos, estudios, títulos y grupos de conocimientos;
+- elegir el tamaño del chip de cada proyecto;
+- sustituir `public/cv.pdf`;
+- **guardar** (escribe el JSON) y **publicar** (commit y push de `content/portfolio.json` y `public/cv.pdf`).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Para ver el resultado mientras se edita, deja `npm run dev` abierto en otra terminal: la web se recarga al guardar.
 
-## Learn More
+Si se edita el JSON a mano, `npm run build` lo valida y dice qué campo falla.
 
-To learn more about Next.js, take a look at the following resources:
+## Despliegue
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`next.config.ts` usa `output: "export"`; `npm run build` genera la web estática en `out/`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+En Cloudflare Pages, conectado al repositorio de GitHub: comando de build `npm run build`, directorio de salida `out`, y el dominio en *Custom domains*. Con eso, cada **publicar** del editor redespliega la web.
 
-## Deploy on Vercel
+## Estructura
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+content/portfolio.json           contenido
+tools/editor/                    editor local (Node, sin dependencias)
+src/data/portfolio.ts            tipos y validación del contenido
+src/components/board/
+  layout.ts        placa en mm: reparto automático de componentes, pista, secciones, scroll
+  decor.ts         pistas secundarias, vías, raíles y desacoplos
+  paint.ts         texturas de la placa: máscara, rugosidad, relieve, editor 2D
+  labels.ts        serigrafía en atlas de alta densidad
+  partTextures.ts  grabados, funda de condensadores, floorplan del die
+  models.ts        modelos 3D de cada encapsulado
+  engine.ts        three.js: cámara, animaciones, selección
+  BoardApp.tsx     interfaz: hojas, nota, estado, inspector
+src/components/SiteContent.tsx   el mismo contenido en HTML para lectores de pantalla y navegadores sin WebGL
+```
