@@ -96,7 +96,8 @@ export class BoardEngine {
   private head!: THREE.Mesh;
   private headRing!: THREE.Mesh;
   private ratsnest!: THREE.Line;
-  private courtyard!: THREE.LineLoop;
+  private courtyard!: THREE.LineSegments;
+  private pulseRing!: THREE.Mesh;
   private fr4Side!: THREE.MeshStandardMaterial;
   private sun!: THREE.DirectionalLight;
   private raycaster = new THREE.Raycaster();
@@ -537,15 +538,36 @@ export class BoardEngine {
     this.ratsnest = new THREE.Line(rg, new THREE.LineBasicMaterial({ color: 0xf2f6ee, transparent: true, opacity: 0.75 }));
     this.board.add(this.ratsnest);
 
+    const L = 0.26;
     const cg = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(-0.5, 0, -0.5),
-      new THREE.Vector3(0.5, 0, -0.5),
-      new THREE.Vector3(0.5, 0, 0.5),
-      new THREE.Vector3(-0.5, 0, 0.5),
+      // top-left
+      new THREE.Vector3(-0.5, 0, -0.5), new THREE.Vector3(-0.5 + L, 0, -0.5),
+      new THREE.Vector3(-0.5, 0, -0.5), new THREE.Vector3(-0.5, 0, -0.5 + L),
+      // top-right
+      new THREE.Vector3(0.5, 0, -0.5), new THREE.Vector3(0.5 - L, 0, -0.5),
+      new THREE.Vector3(0.5, 0, -0.5), new THREE.Vector3(0.5, 0, -0.5 + L),
+      // bottom-right
+      new THREE.Vector3(0.5, 0, 0.5), new THREE.Vector3(0.5 - L, 0, 0.5),
+      new THREE.Vector3(0.5, 0, 0.5), new THREE.Vector3(0.5, 0, 0.5 - L),
+      // bottom-left
+      new THREE.Vector3(-0.5, 0, 0.5), new THREE.Vector3(-0.5 + L, 0, 0.5),
+      new THREE.Vector3(-0.5, 0, 0.5), new THREE.Vector3(-0.5, 0, 0.5 - L),
     ]);
-    this.courtyard = new THREE.LineLoop(cg, new THREE.LineBasicMaterial({ color: 0xff26e2 }));
+    this.courtyard = new THREE.LineSegments(
+      cg,
+      new THREE.LineBasicMaterial({ color: 0xe8c275, transparent: true, opacity: 0.88, depthWrite: false }),
+    );
     this.courtyard.visible = false;
     this.board.add(this.courtyard);
+
+    const ringGeo = new THREE.RingGeometry(0.46, 0.52, 32);
+    ringGeo.rotateX(-Math.PI / 2);
+    this.pulseRing = new THREE.Mesh(
+      ringGeo,
+      new THREE.MeshBasicMaterial({ color: 0xe8c275, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
+    );
+    this.pulseRing.visible = false;
+    this.board.add(this.pulseRing);
   }
 
   private buildParts() {
@@ -656,7 +678,10 @@ export class BoardEngine {
     const follow = lerp(lerp(a.follow, b.follow, t), 0.92, portrait);
     const x = lerp(focusX, head.p[0], follow);
     const y = lerp(focusY, head.p[1], follow);
-    const dist = lerp(a.dist, b.dist, t) * lerp(1, 1.55, portrait);
+    const baseDist = lerp(a.dist, b.dist, t);
+    const zoneFollow = lerp(a.follow, b.follow, t);
+    const portraitScale = lerp(1.55, 1.14, zoneFollow);
+    const dist = baseDist * lerp(1, portraitScale, portrait);
     return {
       tx: x - BOARD.w / 2,
       ty: BOARD.t / 2,
@@ -812,7 +837,11 @@ export class BoardEngine {
       ownerF.set(p.ref, f);
       const e = easeOutCubic(f);
       m.root.visible = f > 0.002 && this.viewT < 0.55 && this.layers.models;
-      m.root.position.y = BOARD.t / 2 + (1 - e) * 24;
+      const isHovered = p.ref === this.hovered && !this.selected;
+      const targetLift = isHovered ? 0.6 : 0;
+      m.root.userData.lift = damp(m.root.userData.lift ?? 0, targetLift, 12, dt);
+      if (Math.abs((m.root.userData.lift ?? 0) - targetLift) > 1e-3) animating = true;
+      m.root.position.y = BOARD.t / 2 + (1 - e) * 24 + (m.root.userData.lift ?? 0);
       m.root.rotation.y = (1 - e) * 0.5;
       if (f >= 1) placed++;
       if (p.kind === "led") {
@@ -1003,11 +1032,37 @@ export class BoardEngine {
       this.events.hover(ref, { pin: h?.pin });
       this.canvas.style.cursor = ref ? "pointer" : "";
     }
-    const p = ref ? partByRef.get(ref) : null;
-    this.courtyard.visible = !!p;
-    if (p) {
-      this.courtyard.position.set(p.x - BOARD.w / 2, BOARD.t / 2 + 0.07, p.y - BOARD.h / 2);
-      this.courtyard.scale.set(p.court[0], 1, p.court[1]);
+
+    const hoveredPart = ref ? partByRef.get(ref) : null;
+    const selectedPart = this.selected ? partByRef.get(this.selected) : null;
+    let targetPart = hoveredPart ?? selectedPart;
+
+    if (!targetPart && this.viewT < 0.55 && !this.flipped && this.d > 20) {
+      const d = this.d;
+      targetPart =
+        parts.find((p) => p.interactive && p.kind !== "switch" && d >= p.dIn - 1 && d <= p.dOut + 8) ??
+        parts.filter((p) => p.interactive && p.kind !== "switch" && d >= p.dOut).slice(-1)[0] ??
+        null;
+    }
+
+    const show = !!targetPart && this.viewT < 0.55 && !this.flipped;
+    this.courtyard.visible = show;
+    this.pulseRing.visible = show;
+
+    if (targetPart && show) {
+      const pad = 0.8;
+      const cw = targetPart.court[0] + pad;
+      const ch = targetPart.court[1] + pad;
+      this.courtyard.position.set(targetPart.x - BOARD.w / 2, BOARD.t / 2 + 0.07, targetPart.y - BOARD.h / 2);
+      this.courtyard.scale.set(cw, 1, ch);
+
+      const cycle = (this.time % 2.4) / 2.4;
+      const expand = 1.0 + cycle * 0.7;
+      const maxDim = Math.max(cw, ch);
+      this.pulseRing.position.copy(this.courtyard.position);
+      this.pulseRing.scale.set(maxDim * expand, 1, maxDim * expand);
+      (this.pulseRing.material as THREE.MeshBasicMaterial).opacity =
+        (1 - cycle) * (hoveredPart ? 0.75 : 0.42);
     }
   }
 
@@ -1058,6 +1113,14 @@ export class BoardEngine {
       if (m) m.active = m.part.kind !== "led" && m.part.kind !== "terminal" && m.part.kind !== "usbc";
     }
     this.events.select(ref);
+  }
+
+  setHovered(ref: string | null) {
+    if (this.hovered === ref) return;
+    this.hovered = ref;
+    this.events.hover(ref);
+    this.updateHover();
+    if (this.renderer) this.renderer.shadowMap.needsUpdate = true;
   }
 
   setView(v: ViewMode) {

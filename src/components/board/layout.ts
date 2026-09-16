@@ -680,7 +680,7 @@ const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.le
 
 const zoneParams: Omit<Zone, "d0" | "d1">[] = [
   { id: "inicio", focus: [72, 40], dist: 235, elev: 56, yaw: -6, follow: 0.25 },
-  { id: "formacion", focus: [mean(row1X), 46], dist: 185, elev: 50, yaw: 4, follow: 0.4 },
+  { id: "formacion", focus: [mean(row1X), 46], dist: 88, elev: 54, yaw: 4, follow: 0.82 },
   { id: "experiencia", focus: [mean(capX), ROW2 - 6], dist: 150, elev: 34, yaw: -10, follow: 0.35 },
   ...chipRows.map((row, ri) => ({
     id: `proyectos-${ri}`,

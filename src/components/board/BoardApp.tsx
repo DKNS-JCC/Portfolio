@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CircleHelp, FileText, FlipVertical2, Mail, X } from "lucide-react";
 import { certs, contactPins, jobs, person, projects, skillGroups, studies } from "@/data/portfolio";
 import type { BoardEngine, ViewMode } from "./engine";
@@ -194,9 +194,24 @@ export default function BoardApp() {
     };
   }, [flipped, setFlipped]);
 
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
   const current = sections.find((s) => s.id === section)!;
   const hoverInfo = hoverText(hover.ref, hover.pin);
   const showLabel = outro > 0.55 && !selected;
+
+  const sectionParts = useMemo(() => {
+    if (section === "inicio") return [];
+    return parts.filter((p) => p.section === section && p.interactive && p.kind !== "switch");
+  }, [section]);
 
   return (
     <>
@@ -288,6 +303,26 @@ export default function BoardApp() {
             ))}
           </ul>
         </section>
+      )}
+
+      {hoverInfo && mousePos && !selected && (
+        <div
+          className="probe-badge"
+          style={{
+            left: Math.min(typeof window !== "undefined" ? window.innerWidth - 240 : 800, mousePos.x + 14),
+            top: Math.max(12, mousePos.y - 48),
+          }}
+          aria-hidden="true"
+        >
+          <div className="probe-badge__header">
+            <span className="probe-badge__ref">{hoverInfo[0]}</span>
+            <span className="probe-badge__name">{hoverInfo[1]}</span>
+          </div>
+          <div className="probe-badge__hint">
+            <span>pulsa para abrir</span>
+            <span className="probe-badge__arrow">↗</span>
+          </div>
+        </div>
       )}
 
       {selected && <Inspector refdes={selected} onClose={() => engineRef.current?.select(null)} />}

@@ -276,13 +276,13 @@ export function crystalTop(fonts: Fonts, lines: [string, string]) {
   const g = c.getContext("2d");
   if (!g) return c;
   g.clearRect(0, 0, W, H);
-  g.fillStyle = "rgba(38,42,46,0.78)";
+  g.fillStyle = "rgba(18,20,22,0.92)";
   g.textAlign = "center";
   g.textBaseline = "middle";
-  g.font = `600 ${H * 0.27}px ${fonts.mono}`;
-  tracked(g, lines[0], W / 2, H * 0.36, 4);
-  g.font = `500 ${H * 0.2}px ${fonts.mono}`;
-  tracked(g, lines[1], W / 2, H * 0.7, 8);
+  g.font = `700 ${Math.round(H * 0.31)}px ${fonts.mono}`;
+  tracked(g, lines[0], W / 2, H * 0.36, 3);
+  g.font = `600 ${Math.round(H * 0.24)}px ${fonts.mono}`;
+  tracked(g, lines[1], W / 2, H * 0.7, 6);
   return c;
 }
 
@@ -313,7 +313,7 @@ export function resistorBands(bands: string[], body: string) {
   const n = bands.length;
   const start = 0.2;
   const end = 0.8;
-  const bw = H * 0.055;
+  const bw = H * 0.065;
   bands.forEach((b, i) => {
     const t = i === n - 1 ? 0.84 : start + ((end - start - 0.1) * i) / Math.max(1, n - 2);
     g.fillStyle = BAND[b] ?? "#000";

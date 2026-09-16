@@ -74,13 +74,13 @@ export function buildLabels(): Label[] {
   /* formación: crystals and resistors */
   ofKind("crystal").forEach((p) => {
     const s = studies[p.index];
-    t({ x: p.x, y: p.y - 4.2, text: p.ref, size: 1.3, align: "center", layer: "ref" });
-    t({ x: p.x, y: p.y + 12.2, text: up(s.period), size: 1.25, align: "center", tracking: 0.1 });
+    t({ x: p.x, y: p.y - 4.2, text: p.ref, size: 1.35, align: "center", layer: "ref", weight: 600 });
+    t({ x: p.x, y: p.y + 12.2, text: up(s.period), size: 1.45, align: "center", tracking: 0.1, weight: 600 });
   });
   ofKind("resistor").forEach((p) => {
     const c = certs[p.index];
-    t({ x: p.x, y: p.y - 3.4, text: p.ref, size: 1.3, align: "center", layer: "ref" });
-    t({ x: p.x, y: p.y + 4.8, text: up(c.code), size: 1.4, align: "center", tracking: 0.12 });
+    t({ x: p.x, y: p.y - 3.4, text: p.ref, size: 1.35, align: "center", layer: "ref", weight: 600 });
+    t({ x: p.x, y: p.y + 4.8, text: up(c.code), size: 1.6, align: "center", tracking: 0.12, weight: 600 });
   });
 
   /* experiencia: capacitors */
